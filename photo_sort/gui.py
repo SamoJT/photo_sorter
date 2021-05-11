@@ -10,11 +10,35 @@ class Gui:
         self.CANVAS_HEIGHT = 250
         self.master = Tk()
         
-        self.radio_btn = IntVar()
+        self.master_radio_btn = IntVar()
+        self.settings_radio_btn = IntVar()
         self._canvas_init()
 
     def main_loop(self):
         mainloop()
+        
+    def settings_window(self):
+        win = Toplevel(self.master)
+        win.title("Settings")
+        win.geometry(f'{self.CANVAS_WIDTH-20}x{self.CANVAS_HEIGHT-60}')
+        
+        h_info = "Enables file hashing to check for duplicates. Enabling will increase run-time."
+        o_info = "Outputs log info into a text file in current directory."
+        default_info = "[JPG, JPEG, PNG, GIF, RAW, MP4, MOV, AVI]"
+        all_info = "All file types. Caution: ALL files will be renamed based on date created."
+        custom_info = "Enter file types seperated by commas."
+        
+        LabelFrame(win, text="Optional").place(x=15, y=5, height=70, width=500)
+        Checkbutton(win, text=f"Hashing - {h_info}").place(x=20, y=20)
+        Checkbutton(win, text=f"Output - {o_info}").place(x=20, y=40)
+        
+        LabelFrame(win, text="Allowed Files").place(x=15, y=80, height=70, width=450)
+        default_btn = Radiobutton(win, text=f"Default - {default_info}", var=self.settings_radio_btn, value=4)
+        Radiobutton(win, text=f"All - {all_info}", var=self.settings_radio_btn, value=5).place(x=20, y=115)
+        default_btn.place(x=20, y=95)
+        default_btn.select()
+        # Potential future feature
+        # Radiobutton(win, text=f"Custom - {custom_info}", var=self.radio_btn, value=3).place(x=20, y=105)
         
     def options(self):
         pass
@@ -36,12 +60,14 @@ class Gui:
         LabelFrame(self.master, text="Enabled Settings").place(x=150, y=55, height=115, width=135)
     
     def _radio_buttons(self):
-        Radiobutton(self.master, text="Rename", var=self.radio_btn, value=1, command=self.options).place(x=20, y=20)
-        Radiobutton(self.master, text="Move", var=self.radio_btn, value=2, command=self.options).place(x=20, y=40)
-        Radiobutton(self.master, text="Both", var=self.radio_btn, value=3, command=self.options).place(x=20, y=70)
+        Radiobutton(self.master, text="Rename", var=self.master_radio_btn, value=1, command=self.options).place(x=20, y=20)
+        Radiobutton(self.master, text="Move", var=self.master_radio_btn, value=2, command=self.options).place(x=20, y=40)
+        bth = Radiobutton(self.master, text="Both", var=self.master_radio_btn, value=3, command=self.options)
+        bth.place(x=20, y=70)
+        bth.select()
         
     def _push_buttons(self):
-        Button(self.master, text="Settings", width=11).place(x=15, y=105)
+        Button(self.master, text="Settings", command=self.settings_window, width=11).place(x=15, y=105)
         Button(self.master, text="Go!", width=11).place(x=15, y=135)
         Button(self.master, text="Select dir", command=self.get_dir, width=7).place(x=455, y=17)
         
@@ -68,3 +94,4 @@ class Gui:
         self._radio_buttons()
         self._push_buttons()
         self._progress_bar()
+        # self.settings_window()  #DEBUG
