@@ -47,8 +47,14 @@ class Gui:
         all_btn = Radiobutton(win, text=f"All - {all_info}", var=self.settings_radio_btn, value=5, command=self._update_settings)
         all_btn.place(x=20, y=115)
         
-        # for k in self.settings:
-            
+        if self.settings['Files'] == 'Default':
+            default_btn.select()
+        elif self.settings['Files'] == 'All':
+            all_btn.select()
+        if self.settings['Hashing']:
+            hash_btn.select()
+        if self.settings['Output']:
+            out_btn.select()
             
         Button(win, text="Apply", command=lambda:self._apply_settings()).place(x=15, y=150)
         # Potential future feature
