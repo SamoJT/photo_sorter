@@ -36,19 +36,27 @@ class Gui:
         self.h_var, self.o_var = BooleanVar(), BooleanVar()
         
         LabelFrame(win, text="Optional").place(x=15, y=5, height=70, width=500)
-        Checkbutton(win, text=f"Hashing - {h_info}", var=self.h_var, command=self._update_settings).place(x=20, y=20)
-        Checkbutton(win, text=f"Output - {o_info}", var=self.o_var, command=self._update_settings).place(x=20, y=40)
+        hash_btn = Checkbutton(win, text=f"Hashing - {h_info}", var=self.h_var, command=self._update_settings)
+        hash_btn.place(x=20, y=20)
+        out_btn = Checkbutton(win, text=f"Output - {o_info}", var=self.o_var, command=self._update_settings)
+        out_btn.place(x=20, y=40)
         
         LabelFrame(win, text="Allowed Files").place(x=15, y=80, height=70, width=450)
         default_btn = Radiobutton(win, text=f"Default - {default_info}", var=self.settings_radio_btn, value=4, command=self._update_settings)
-        Radiobutton(win, text=f"All - {all_info}", var=self.settings_radio_btn, value=5, command=self._update_settings).place(x=20, y=115)
         default_btn.place(x=20, y=95)
-        default_btn.select()
+        all_btn = Radiobutton(win, text=f"All - {all_info}", var=self.settings_radio_btn, value=5, command=self._update_settings)
+        all_btn.place(x=20, y=115)
+        
+        # for k in self.settings:
+            
+            
         Button(win, text="Apply", command=lambda:self._apply_settings()).place(x=15, y=150)
         # Potential future feature
         # Radiobutton(win, text=f"Custom - {custom_info}", var=self.radio_btn, value=3).place(x=20, y=105)
 
     def _apply_settings(self):
+        for w in self.settings_frame.winfo_children():
+            w.destroy()
         return self._dynamic_labels(self.default, self.target_dir, self.num_files, self.settings)
     
     def _update_settings(self):
@@ -64,6 +72,7 @@ class Gui:
             c += 1
         
     def test(self):
+        self._apply_settings()
         print(self.settings)
         
     def options(self):
@@ -84,7 +93,8 @@ class Gui:
         LabelFrame(self.master).place(x=15, y=65, height=35, width=90)  # Both divider
         LabelFrame(self.master, text="Directory").place(x=150, y=5, height=45, width=300)
         LabelFrame(self.master, text="Output").place(x=300, y=55, height=115, width=150)
-        LabelFrame(self.master, text="Enabled Settings").place(x=150, y=55, height=115, width=135)
+        self.settings_frame = LabelFrame(self.master, text="Enabled Settings")
+        self.settings_frame.place(x=150, y=55, height=115, width=135)
     
     def _radio_buttons(self):
         Radiobutton(self.master, text="Rename", var=self.master_radio_btn, value=1, command=self.options).place(x=20, y=20)
@@ -108,17 +118,18 @@ class Gui:
         Label(self.master, text=working_dir).place(x=155, y=23)
         Label(self.master, text=file_num).place(x=75, y=190)
         
-        y = 75
+        y = 3
         for k in enabled_settings:
             if enabled_settings[k]:
                 out = f"{k} - {enabled_settings[k]}"
-                Label(self.master, text=out).place(x=155, y=y)
+                tmp = Label(self.settings_frame, text=out).place(x=5, y=y)
                 y += 20
     
     def _progress_bar(self):
         progress = Progressbar(self.master, orient=HORIZONTAL, length=300, mode="determinate").place(x=150, y=190)
         
     def _canvas_init(self):
+        self.master.resizable(width=False, height=False)
         self.master.title("Photo Sorter")
         # self.master.iconbitmap('../imgs/icon.ico')  # Throws not defined error.
         self.master.geometry(f'{self.CANVAS_WIDTH}x{self.CANVAS_HEIGHT}')
