@@ -78,8 +78,8 @@ class Gui:
             c += 1
         
     def test(self):
-        self._apply_settings()
-        print(self.settings)
+        print("TESTING")
+        
         
     def options(self):
         pass
@@ -92,7 +92,7 @@ class Gui:
         self.target_dir = askdirectory()
         self.num_files = self.count_files(self.target_dir)
         self.default = False
-        self._dynamic_labels(self.default, self.target_dir, self.num_files)
+        self._dynamic_labels(self.default, self.target_dir, self.num_files, self.settings)
         
     def _frames(self):
         LabelFrame(self.master, text="Options").place(x=15, y=5, height=85, width=90)
