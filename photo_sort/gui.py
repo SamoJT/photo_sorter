@@ -1,4 +1,5 @@
 import os
+import name_format
 from tkinter import *
 from tkinter.filedialog import askdirectory
 from tkinter.ttk import Progressbar
@@ -10,7 +11,7 @@ class Gui:
         self.CANVAS_HEIGHT = 250
         self.master = Tk()
         
-        self.master_radio_btn = IntVar()
+        self.options_radio_btn = IntVar()
         self.settings_radio_btn = IntVar()
         self.settings = {'Files': 'Default',
                          'Hashing': False,
@@ -22,8 +23,12 @@ class Gui:
 
     def main_loop(self):
         mainloop()
+    
+    def run_logic(self):
+        d = self.target_dir
+        name_format.main(d)
         
-    def settings_window(self):
+    def _settings_window(self):
         win = Toplevel(self.master)
         win.title("Settings")
         win.geometry(f'{self.CANVAS_WIDTH-20}x{self.CANVAS_HEIGHT-60}')
@@ -61,8 +66,7 @@ class Gui:
         # Radiobutton(win, text=f"Custom - {custom_info}", var=self.radio_btn, value=3).place(x=20, y=105)
 
     def _apply_settings(self):
-        for w in self.settings_frame.winfo_children():
-            w.destroy()
+        self._clear_frames(self.settings_frame)
         return self._dynamic_labels(self.default, self.target_dir, self.num_files, self.settings)
     
     def _update_settings(self):
@@ -79,50 +83,70 @@ class Gui:
         
     def test(self):
         print("TESTING")
-        
-        
-    def options(self):
-        pass
+        print(f"Settings: {self.settings}\nOption: {self.options_radio_btn.get()}\nDir: {self.target_dir}")
     
-    def count_files(self, d):
-        pth, ds, fs = next(os.walk(d))
-        return len(fs)
+    def _count_files(self, d):
+        # pth, ds, fs = next(os.walk(d))  # Can be used if only current dir file tot is required
+        f_tot = 0
+        for pth, ds, fs in os.walk(d):
+            for n in fs:
+                f_tot += 1
+        return f_tot
     
-    def get_dir(self):
-        self.target_dir = askdirectory()
-        self.num_files = self.count_files(self.target_dir)
-        self.default = False
-        self._dynamic_labels(self.default, self.target_dir, self.num_files, self.settings)
+    def _get_dir(self):
+        try:
+            self.target_dir = askdirectory()
+            self.num_files = self._count_files(self.target_dir)
+            self.default = False
+            self._dynamic_labels(self.default, self.target_dir, self.num_files, self.settings)
+        except:
+            pass
         
     def _frames(self):
         LabelFrame(self.master, text="Options").place(x=15, y=5, height=85, width=90)
         LabelFrame(self.master).place(x=15, y=65, height=35, width=90)  # Both divider
-        LabelFrame(self.master, text="Directory").place(x=150, y=5, height=45, width=300)
-        LabelFrame(self.master, text="Output").place(x=300, y=55, height=115, width=150)
+        
+        self.dir_frame = LabelFrame(self.master, text="Directory")
+        self.dir_frame.place(x=150, y=5, height=45, width=300)
+        
+        self.out_frame = LabelFrame(self.master, text="Output")
+        self.out_frame.place(x=300, y=55, height=115, width=150)
+        
         self.settings_frame = LabelFrame(self.master, text="Enabled Settings")
         self.settings_frame.place(x=150, y=55, height=115, width=135)
+        
+        self.numF_frame = Frame(self.master)
+        self.numF_frame.place(x=79, y=190, height=20, width=30)
+        
+
     
     def _radio_buttons(self):
-        Radiobutton(self.master, text="Rename", var=self.master_radio_btn, value=1, command=self.options).place(x=20, y=20)
-        Radiobutton(self.master, text="Move", var=self.master_radio_btn, value=2, command=self.options).place(x=20, y=40)
-        bth = Radiobutton(self.master, text="Both", var=self.master_radio_btn, value=3, command=self.options)
+        Radiobutton(self.master, text="Rename", var=self.options_radio_btn, value=1).place(x=20, y=20)
+        Radiobutton(self.master, text="Move", var=self.options_radio_btn, value=2).place(x=20, y=40)
+        bth = Radiobutton(self.master, text="Both", var=self.options_radio_btn, value=3)
         bth.place(x=20, y=70)
         bth.select()
         
     def _push_buttons(self):
-        Button(self.master, text="Settings", command=self.settings_window, width=11).place(x=15, y=105)
-        Button(self.master, text="Go!", command=lambda:self.test(), width=11).place(x=15, y=135)
-        Button(self.master, text="Select dir", command=self.get_dir, width=7).place(x=455, y=17)
+        Button(self.master, text="Settings", command=self._settings_window, width=11).place(x=15, y=105)
+        Button(self.master, text="Go!", command=lambda:self.run_logic(), width=11).place(x=15, y=135)
+        Button(self.master, text="Select dir", command=self._get_dir, width=7).place(x=455, y=17)
         
     def _static_labels(self):
         Label(self.master, text="Total Files: ").place(x=15, y=190)
         
+    def _clear_frames(self, *f):
+        for frame in f:
+            for w in frame.winfo_children():
+                w.destroy()
+            
     def _dynamic_labels(self, default, working_dir, file_num, enabled_settings):
         if default:
             working_dir = "No directory selected"
             file_num = 0
-        Label(self.master, text=working_dir).place(x=155, y=23)
-        Label(self.master, text=file_num).place(x=75, y=190)
+        self._clear_frames(self.dir_frame, self.numF_frame)
+        Label(self.dir_frame, text=working_dir).place(x=5, y=0)
+        Label(self.numF_frame, text=file_num).place(x=0, y=0)
         
         y = 3
         for k in enabled_settings:
@@ -140,8 +164,8 @@ class Gui:
         # self.master.iconbitmap('../imgs/icon.ico')  # Throws not defined error.
         self.master.geometry(f'{self.CANVAS_WIDTH}x{self.CANVAS_HEIGHT}')
         self._frames()
-        self._static_labels()
         self._dynamic_labels(self.default, None, None, self.settings)
+        self._static_labels()
         self._radio_buttons()
         self._push_buttons()
         self._progress_bar()
