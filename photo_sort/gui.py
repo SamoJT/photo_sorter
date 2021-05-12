@@ -12,6 +12,12 @@ class Gui:
         
         self.master_radio_btn = IntVar()
         self.settings_radio_btn = IntVar()
+        self.settings = {'Files': 'Default',
+                         'Hashing': False,
+                         'Output': False}
+        self.target_dir = ''
+        self.num_files = 0
+        self.default = True
         self._canvas_init()
 
     def main_loop(self):
@@ -27,18 +33,38 @@ class Gui:
         default_info = "[JPG, JPEG, PNG, GIF, RAW, MP4, MOV, AVI]"
         all_info = "All file types. Caution: ALL files will be renamed based on date created."
         custom_info = "Enter file types seperated by commas."
+        self.h_var, self.o_var = BooleanVar(), BooleanVar()
         
         LabelFrame(win, text="Optional").place(x=15, y=5, height=70, width=500)
-        Checkbutton(win, text=f"Hashing - {h_info}").place(x=20, y=20)
-        Checkbutton(win, text=f"Output - {o_info}").place(x=20, y=40)
+        Checkbutton(win, text=f"Hashing - {h_info}", var=self.h_var, command=self._update_settings).place(x=20, y=20)
+        Checkbutton(win, text=f"Output - {o_info}", var=self.o_var, command=self._update_settings).place(x=20, y=40)
         
         LabelFrame(win, text="Allowed Files").place(x=15, y=80, height=70, width=450)
-        default_btn = Radiobutton(win, text=f"Default - {default_info}", var=self.settings_radio_btn, value=4)
-        Radiobutton(win, text=f"All - {all_info}", var=self.settings_radio_btn, value=5).place(x=20, y=115)
+        default_btn = Radiobutton(win, text=f"Default - {default_info}", var=self.settings_radio_btn, value=4, command=self._update_settings)
+        Radiobutton(win, text=f"All - {all_info}", var=self.settings_radio_btn, value=5, command=self._update_settings).place(x=20, y=115)
         default_btn.place(x=20, y=95)
         default_btn.select()
+        Button(win, text="Apply", command=lambda:self._apply_settings()).place(x=15, y=150)
         # Potential future feature
         # Radiobutton(win, text=f"Custom - {custom_info}", var=self.radio_btn, value=3).place(x=20, y=105)
+
+    def _apply_settings(self):
+        return self._dynamic_labels(self.default, self.target_dir, self.num_files, self.settings)
+    
+    def _update_settings(self):
+        if self.settings_radio_btn.get() == 4:
+            f = 'Default'
+        else:
+            f = 'All'
+        tmp = [f, self.h_var.get(), self.o_var.get()]
+        c = 0
+        for i in tmp:
+            k = list(self.settings)[c]
+            self.settings[k] = i
+            c += 1
+        
+    def test(self):
+        print(self.settings)
         
     def options(self):
         pass
@@ -48,9 +74,10 @@ class Gui:
         return len(fs)
     
     def get_dir(self):
-        d = askdirectory()
-        n = self.count_files(d)
-        self._dynamic_labels(False, d, n)
+        self.target_dir = askdirectory()
+        self.num_files = self.count_files(self.target_dir)
+        self.default = False
+        self._dynamic_labels(self.default, self.target_dir, self.num_files)
         
     def _frames(self):
         LabelFrame(self.master, text="Options").place(x=15, y=5, height=85, width=90)
@@ -68,30 +95,38 @@ class Gui:
         
     def _push_buttons(self):
         Button(self.master, text="Settings", command=self.settings_window, width=11).place(x=15, y=105)
-        Button(self.master, text="Go!", width=11).place(x=15, y=135)
+        Button(self.master, text="Go!", command=lambda:self.test(), width=11).place(x=15, y=135)
         Button(self.master, text="Select dir", command=self.get_dir, width=7).place(x=455, y=17)
         
     def _static_labels(self):
         Label(self.master, text="Total Files: ").place(x=15, y=190)
         
-    def _dynamic_labels(self, default, working_dir, file_num):
+    def _dynamic_labels(self, default, working_dir, file_num, enabled_settings):
         if default:
             working_dir = "No directory selected"
             file_num = 0
         Label(self.master, text=working_dir).place(x=155, y=23)
         Label(self.master, text=file_num).place(x=75, y=190)
+        
+        y = 75
+        for k in enabled_settings:
+            if enabled_settings[k]:
+                out = f"{k} - {enabled_settings[k]}"
+                Label(self.master, text=out).place(x=155, y=y)
+                y += 20
     
     def _progress_bar(self):
         progress = Progressbar(self.master, orient=HORIZONTAL, length=300, mode="determinate").place(x=150, y=190)
-    
+        
     def _canvas_init(self):
         self.master.title("Photo Sorter")
         # self.master.iconbitmap('../imgs/icon.ico')  # Throws not defined error.
         self.master.geometry(f'{self.CANVAS_WIDTH}x{self.CANVAS_HEIGHT}')
         self._frames()
         self._static_labels()
-        self._dynamic_labels(True, None, None)
+        self._dynamic_labels(self.default, None, None, self.settings)
         self._radio_buttons()
         self._push_buttons()
         self._progress_bar()
-        # self.settings_window()  #DEBUG
+        
+        
