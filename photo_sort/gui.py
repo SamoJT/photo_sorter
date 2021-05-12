@@ -26,8 +26,17 @@ class Gui:
     
     def run_logic(self):
         d = self.target_dir
-        name_format.main(d)
-        
+        f = name_format.main(d)
+        while True:
+            try:
+                done = next(f)
+                
+            except:
+                break
+    
+    def _output_labels(self):
+        pass
+    
     def _settings_window(self):
         win = Toplevel(self.master)
         win.title("Settings")
@@ -67,7 +76,7 @@ class Gui:
 
     def _apply_settings(self):
         self._clear_frames(self.settings_frame)
-        return self._dynamic_labels(self.default, self.target_dir, self.num_files, self.settings)
+        self._dynamic_labels(self.default, self.target_dir, self.num_files, self.settings)
     
     def _update_settings(self):
         if self.settings_radio_btn.get() == 4:
@@ -110,16 +119,27 @@ class Gui:
         self.dir_frame.place(x=150, y=5, height=45, width=300)
         
         self.out_frame = LabelFrame(self.master, text="Output")
-        self.out_frame.place(x=300, y=55, height=115, width=150)
+        self.out_frame.place(x=300, y=55, height=105, width=161)
         
         self.settings_frame = LabelFrame(self.master, text="Enabled Settings")
-        self.settings_frame.place(x=150, y=55, height=115, width=135)
+        self.settings_frame.place(x=150, y=55, height=105, width=135)
         
         self.numF_frame = Frame(self.master)
         self.numF_frame.place(x=79, y=190, height=20, width=30)
-        
-
     
+    def _listbox(self):
+        sb = Scrollbar(self.out_frame)
+        sb.place(x=140, y=0)
+        # sb.pack(side=RIGHT, fill=Y)
+        self.output_lb = Listbox(self.out_frame, width=23, height=5, yscrollcommand=sb.set)
+        self.output_lb.place(x=0, y=0)
+        sb.config(command=self.output_lb.yview)
+        
+        for i in range(20):
+            self.output_lb.insert(END, i)  # Max char = 31
+            
+        self.output_lb['state'] = DISABLED
+            
     def _radio_buttons(self):
         Radiobutton(self.master, text="Rename", var=self.options_radio_btn, value=1).place(x=20, y=20)
         Radiobutton(self.master, text="Move", var=self.options_radio_btn, value=2).place(x=20, y=40)
@@ -166,6 +186,7 @@ class Gui:
         self._frames()
         self._dynamic_labels(self.default, None, None, self.settings)
         self._static_labels()
+        self._listbox()
         self._radio_buttons()
         self._push_buttons()
         self._progress_bar()
