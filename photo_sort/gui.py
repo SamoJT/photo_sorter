@@ -21,6 +21,7 @@ class Gui:
         self.default = True
         self._canvas_init()
 
+
     def main_loop(self):
         mainloop()
     
@@ -33,10 +34,50 @@ class Gui:
                 
             except:
                 break
-    
+
+          
+    def _clear_frames(self, *f):
+        for frame in f:
+            for w in frame.winfo_children():
+                w.destroy()
+                
     def _output_labels(self):
         pass
+
+    def _count_files(self, d):
+        # pth, ds, fs = next(os.walk(d))  # Can be used if only current dir file tot is required
+        f_tot = 0
+        for pth, ds, fs in os.walk(d):
+            for n in fs:
+                f_tot += 1
+        return f_tot
     
+    def _get_dir(self):
+        try:
+            self.target_dir = askdirectory()
+            self.num_files = self._count_files(self.target_dir)
+            self.default = False
+            self._dynamic_labels(self.default, self.target_dir, self.num_files, self.settings)
+        except:
+            pass
+
+
+    def _update_settings(self):
+        if self.settings_radio_btn.get() == 4:
+            f = 'Default'
+        else:
+            f = 'All'
+        tmp = [f, self.h_var.get(), self.o_var.get()]
+        c = 0
+        for i in tmp:
+            k = list(self.settings)[c]
+            self.settings[k] = i
+            c += 1
+
+    def _apply_settings(self):
+        self._clear_frames(self.settings_frame)
+        self._dynamic_labels(self.default, self.target_dir, self.num_files, self.settings)
+
     def _settings_window(self):
         win = Toplevel(self.master)
         win.title("Settings")
@@ -74,43 +115,7 @@ class Gui:
         # Potential future feature
         # Radiobutton(win, text=f"Custom - {custom_info}", var=self.radio_btn, value=3).place(x=20, y=105)
 
-    def _apply_settings(self):
-        self._clear_frames(self.settings_frame)
-        self._dynamic_labels(self.default, self.target_dir, self.num_files, self.settings)
-    
-    def _update_settings(self):
-        if self.settings_radio_btn.get() == 4:
-            f = 'Default'
-        else:
-            f = 'All'
-        tmp = [f, self.h_var.get(), self.o_var.get()]
-        c = 0
-        for i in tmp:
-            k = list(self.settings)[c]
-            self.settings[k] = i
-            c += 1
-        
-    def test(self):
-        print("TESTING")
-        print(f"Settings: {self.settings}\nOption: {self.options_radio_btn.get()}\nDir: {self.target_dir}")
-    
-    def _count_files(self, d):
-        # pth, ds, fs = next(os.walk(d))  # Can be used if only current dir file tot is required
-        f_tot = 0
-        for pth, ds, fs in os.walk(d):
-            for n in fs:
-                f_tot += 1
-        return f_tot
-    
-    def _get_dir(self):
-        try:
-            self.target_dir = askdirectory()
-            self.num_files = self._count_files(self.target_dir)
-            self.default = False
-            self._dynamic_labels(self.default, self.target_dir, self.num_files, self.settings)
-        except:
-            pass
-        
+
     def _frames(self):
         LabelFrame(self.master, text="Options").place(x=15, y=5, height=85, width=90)
         LabelFrame(self.master).place(x=15, y=65, height=35, width=90)  # Both divider
@@ -126,40 +131,7 @@ class Gui:
         
         self.numF_frame = Frame(self.master)
         self.numF_frame.place(x=79, y=190, height=20, width=30)
-    
-    def _listbox(self):
-        sb = Scrollbar(self.out_frame)
-        sb.place(x=140, y=0)
-        # sb.pack(side=RIGHT, fill=Y)
-        self.output_lb = Listbox(self.out_frame, width=23, height=5, yscrollcommand=sb.set)
-        self.output_lb.place(x=0, y=0)
-        sb.config(command=self.output_lb.yview)
-        
-        for i in range(20):
-            self.output_lb.insert(END, i)  # Max char = 31
-            
-        self.output_lb['state'] = DISABLED
-            
-    def _radio_buttons(self):
-        Radiobutton(self.master, text="Rename", var=self.options_radio_btn, value=1).place(x=20, y=20)
-        Radiobutton(self.master, text="Move", var=self.options_radio_btn, value=2).place(x=20, y=40)
-        bth = Radiobutton(self.master, text="Both", var=self.options_radio_btn, value=3)
-        bth.place(x=20, y=70)
-        bth.select()
-        
-    def _push_buttons(self):
-        Button(self.master, text="Settings", command=self._settings_window, width=11).place(x=15, y=105)
-        Button(self.master, text="Go!", command=lambda:self.run_logic(), width=11).place(x=15, y=135)
-        Button(self.master, text="Select dir", command=self._get_dir, width=7).place(x=455, y=17)
-        
-    def _static_labels(self):
-        Label(self.master, text="Total Files: ").place(x=15, y=190)
-        
-    def _clear_frames(self, *f):
-        for frame in f:
-            for w in frame.winfo_children():
-                w.destroy()
-            
+
     def _dynamic_labels(self, default, working_dir, file_num, enabled_settings):
         if default:
             working_dir = "No directory selected"
@@ -174,15 +146,44 @@ class Gui:
                 out = f"{k} - {enabled_settings[k]}"
                 tmp = Label(self.settings_frame, text=out).place(x=5, y=y)
                 y += 20
-    
+                
+    def _static_labels(self):
+        Label(self.master, text="Total Files: ").place(x=15, y=190)
+               
+    def _listbox(self):
+        sb = Scrollbar(self.out_frame)
+        sb.pack(side=RIGHT, fill=Y)
+        self.output_lb = Listbox(self.out_frame, width=23, height=5, yscrollcommand=sb.set)
+        self.output_lb.place(x=0, y=0)
+        sb.config(command=self.output_lb.yview)
+        
+
+        # self.output_lb.insert(END, i)  # Max char = 31
+        # self.output_lb.see(END)
+        # self.output_lb.delete(0, 'end')  # Clear listbox
+        # self.output_lb['state'] = DISABLED
+            
+    def _radio_buttons(self):
+        Radiobutton(self.master, text="Rename", var=self.options_radio_btn, value=1).place(x=20, y=20)
+        Radiobutton(self.master, text="Move", var=self.options_radio_btn, value=2).place(x=20, y=40)
+        bth = Radiobutton(self.master, text="Both", var=self.options_radio_btn, value=3)
+        bth.place(x=20, y=70)
+        bth.select()
+        
+    def _push_buttons(self):
+        Button(self.master, text="Settings", command=self._settings_window, width=11).place(x=15, y=105)
+        Button(self.master, text="Go!", command=lambda:self.run_logic(), width=11).place(x=15, y=135)
+        Button(self.master, text="Select dir", command=self._get_dir, width=7).place(x=455, y=17)
+        
     def _progress_bar(self):
         progress = Progressbar(self.master, orient=HORIZONTAL, length=300, mode="determinate").place(x=150, y=190)
-        
+
     def _canvas_init(self):
         self.master.resizable(width=False, height=False)
         self.master.title("Photo Sorter")
         # self.master.iconbitmap('../imgs/icon.ico')  # Throws not defined error.
         self.master.geometry(f'{self.CANVAS_WIDTH}x{self.CANVAS_HEIGHT}')
+        
         self._frames()
         self._dynamic_labels(self.default, None, None, self.settings)
         self._static_labels()
@@ -190,5 +191,14 @@ class Gui:
         self._radio_buttons()
         self._push_buttons()
         self._progress_bar()
+
+  
+    def test(self):
+        print("TESTING")
+        print(f"Settings: {self.settings}\nOption: {self.options_radio_btn.get()}\nDir: {self.target_dir}")
         
-        
+        i = 'TEST'
+        self.output_lb['state'] = NORMAL
+        self.output_lb.insert(END, i)  # Max char = 31
+        self.output_lb.see(END)
+        self.output_lb['state'] = DISABLED
