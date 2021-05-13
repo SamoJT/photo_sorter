@@ -25,17 +25,37 @@ class Gui:
     def main_loop(self):
         mainloop()
     
-    def run_logic(self):
-        d = self.target_dir
-        f = name_format.main(d)
+           
+    def _rename_1(self):
+        n_f = name_format.main(self.target_dir)
         while True:
             try:
-                done = next(f)
-                
+                self.output_lb['state'] = NORMAL
+                self.output_lb.insert(END, next(n_f))
+                self.output_lb.see(END)
+                self.output_lb['state'] = DISABLED
+                self.progress_bar['value'] += 10
             except:
+                self.output_lb.insert(END, 'Done!')
+                self.output_lb.see(END)
+                self.output_lb['state'] = DISABLED
+                self.progress_bar['value'] = 100
                 break
+                
+    def _move_2(self):
+        pass
+    
+    def _both_3(self):
+        pass
+        
+    def run_logic(self):
+        options = {1: self._rename_1, 
+                   2: self._move_2, 
+                   3: self._both_3}
+        
+        options[self.options_radio_btn.get()]()
 
-          
+      
     def _clear_frames(self, *f):
         for frame in f:
             for w in frame.winfo_children():
@@ -53,14 +73,15 @@ class Gui:
         return f_tot
     
     def _get_dir(self):
-        try:
-            self.target_dir = askdirectory()
-            self.num_files = self._count_files(self.target_dir)
-            self.default = False
+        self.target_dir = askdirectory()
+        if self.target_dir == '':
             self._dynamic_labels(self.default, self.target_dir, self.num_files, self.settings)
-        except:
-            pass
-
+            return
+        self.num_files = self._count_files(self.target_dir)
+        self.default = False
+        self.progress_bar['value'] = 0
+        self._dynamic_labels(self.default, self.target_dir, self.num_files, self.settings)
+       
 
     def _update_settings(self):
         if self.settings_radio_btn.get() == 4:
@@ -176,8 +197,9 @@ class Gui:
         Button(self.master, text="Select dir", command=self._get_dir, width=7).place(x=455, y=17)
         
     def _progress_bar(self):
-        progress = Progressbar(self.master, orient=HORIZONTAL, length=300, mode="determinate").place(x=150, y=190)
-
+        self.progress_bar = Progressbar(self.master, orient=HORIZONTAL, length=300, mode="determinate")
+        self.progress_bar.place(x=150, y=190)
+        
     def _canvas_init(self):
         self.master.resizable(width=False, height=False)
         self.master.title("Photo Sorter")
@@ -191,14 +213,15 @@ class Gui:
         self._radio_buttons()
         self._push_buttons()
         self._progress_bar()
+        
+        self.test_btn()
 
-  
+    def test_btn(self):
+        Button(self.master, text="DEBUG", command=lambda:self.test()).place(x=470, y=200)
+
     def test(self):
         print("TESTING")
         print(f"Settings: {self.settings}\nOption: {self.options_radio_btn.get()}\nDir: {self.target_dir}")
         
-        i = 'TEST'
-        self.output_lb['state'] = NORMAL
-        self.output_lb.insert(END, i)  # Max char = 31
-        self.output_lb.see(END)
-        self.output_lb['state'] = DISABLED
+        self.master.update_idletasks()
+        self.progress_bar['value'] += 10

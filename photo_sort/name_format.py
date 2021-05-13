@@ -33,8 +33,11 @@ def rename(d, old, new, ext, c):
         return False
     
 def main(d):
-    main.tot = 0
+    tot = 0
     for root, dirs, file in os.walk(d):
+        if tot == 0:
+            yield f'{len(dirs)} subdirectories'
+            
         for name in file:
             full_path = os.path.join(root, name)
             c = 1
@@ -42,6 +45,6 @@ def main(d):
             fn, ext = os.path.splitext(full_path)
             while not rename(root, full_path, date, ext, c):
                 c += 1
-            main.tot += 1
-        yield main.tot
-        # print(f'Renamed {main.tot}')
+            tot += 1
+        yield f'Renamed {tot} files'
+    return
