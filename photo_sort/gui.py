@@ -16,6 +16,10 @@ class Gui:
         self.settings = {'Files': 'Default',
                          'Hashing': False,
                          'Output': False}
+        self.default_files = ['JPG', 'JPEG', 
+                              'PNG', 'GIF', 
+                              'RAW', 'MP4', 
+                              'MOV', 'AVI']
         self.target_dir = ''
         self.num_files = 0
         self.default = True
@@ -27,7 +31,12 @@ class Gui:
     
            
     def _rename_1(self):
-        n_f = name_format.main(self.target_dir)
+        if self.settings['Files'] == 'Default':
+            allowed_files = self.default_files
+        else:
+            allowed_files = 'All'
+            
+        n_f = name_format.main(self.target_dir, allowed_files)
         while True:
             try:
                 self.output_lb['state'] = NORMAL
@@ -106,7 +115,7 @@ class Gui:
         
         h_info = "Enables file hashing to check for duplicates. Enabling will increase run-time."
         o_info = "Outputs log info into a text file in current directory."
-        default_info = "[JPG, JPEG, PNG, GIF, RAW, MP4, MOV, AVI]"
+        default_info = f"{self.default_files}"
         all_info = "All file types. Caution: ALL files will be renamed based on date created."
         custom_info = "Enter file types seperated by commas."
         self.h_var, self.o_var = BooleanVar(), BooleanVar()
@@ -145,7 +154,7 @@ class Gui:
         self.dir_frame.place(x=150, y=5, height=45, width=300)
         
         self.out_frame = LabelFrame(self.master, text="Output")
-        self.out_frame.place(x=300, y=55, height=105, width=161)
+        self.out_frame.place(x=300, y=55, height=105, width=200)
         
         self.settings_frame = LabelFrame(self.master, text="Enabled Settings")
         self.settings_frame.place(x=150, y=55, height=105, width=135)
@@ -174,15 +183,10 @@ class Gui:
     def _listbox(self):
         sb = Scrollbar(self.out_frame)
         sb.pack(side=RIGHT, fill=Y)
-        self.output_lb = Listbox(self.out_frame, width=23, height=5, yscrollcommand=sb.set)
+        self.output_lb = Listbox(self.out_frame, width=29, height=5, yscrollcommand=sb.set)
         self.output_lb.place(x=0, y=0)
         sb.config(command=self.output_lb.yview)
-        
-
-        # self.output_lb.insert(END, i)  # Max char = 31
-        # self.output_lb.see(END)
-        # self.output_lb.delete(0, 'end')  # Clear listbox
-        # self.output_lb['state'] = DISABLED
+        self.output_lb['state'] = DISABLED
             
     def _radio_buttons(self):
         Radiobutton(self.master, text="Rename", var=self.options_radio_btn, value=1).place(x=20, y=20)
@@ -223,5 +227,6 @@ class Gui:
         print("TESTING")
         print(f"Settings: {self.settings}\nOption: {self.options_radio_btn.get()}\nDir: {self.target_dir}")
         
-        self.master.update_idletasks()
-        self.progress_bar['value'] += 10
+        self.output_lb['state'] = NORMAL
+        i = ('test', '\n', 'test2')
+        self.output_lb.insert(END, i)

@@ -32,17 +32,21 @@ def rename(d, old, new, ext, c):
     except:
         return False
     
-def main(d):
+def main(d, allowed_ft):
     tot = 0
     for root, dirs, file in os.walk(d):
         if tot == 0:
             yield f'{len(dirs)} subdirectories'
-            
         for name in file:
             full_path = os.path.join(root, name)
+            fn, ext = os.path.splitext(full_path)
+            if type(allowed_ft) == list:
+                if ext.lstrip('.') not in allowed_ft:
+                    yield f'Skipping: {name}'
+                    yield f'Dissalowed FileType: {ext}'
+                    continue
             c = 1
             date = get_taken(full_path)
-            fn, ext = os.path.splitext(full_path)
             while not rename(root, full_path, date, ext, c):
                 c += 1
             tot += 1
