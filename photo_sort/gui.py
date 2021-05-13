@@ -23,6 +23,7 @@ class Gui:
         self.target_dir = ''
         self.num_files = 0
         self.default = True
+        self.out_list = []
         self._canvas_init()
 
 
@@ -35,12 +36,14 @@ class Gui:
             allowed_files = self.default_files
         else:
             allowed_files = 'All'
-            
+
         n_f = name_format.main(self.target_dir, allowed_files)
         while True:
             try:
                 self.output_lb['state'] = NORMAL
-                self.output_lb.insert(END, next(n_f))
+                out = next(n_f)
+                self.output_lb.insert(END, out)
+                self.out_list.append(out)
                 self.output_lb.see(END)
                 self.output_lb['state'] = DISABLED
                 self.progress_bar['value'] += 10
@@ -50,7 +53,10 @@ class Gui:
                 self.output_lb['state'] = DISABLED
                 self.progress_bar['value'] = 100
                 break
-                
+
+        if self.settings['Output']:
+            self._output(self.out_list)
+                    
     def _move_2(self):
         pass
     
@@ -64,7 +70,15 @@ class Gui:
         
         options[self.options_radio_btn.get()]()
 
-      
+    def _output(self, out_list):
+        with open('output.txt', 'w') as f:
+                for o in out_list:
+                    f.write(f'{o}\n')
+        self.output_lb['state'] = NORMAL
+        self.output_lb.insert(END, 'Output written to file: out.txt')
+        self.output_lb.see(END)
+        self.output_lb['state'] = DISABLED
+                    
     def _clear_frames(self, *f):
         for frame in f:
             for w in frame.winfo_children():
@@ -84,6 +98,7 @@ class Gui:
     def _get_dir(self):
         self.target_dir = askdirectory()
         if self.target_dir == '':
+            self.default = True
             self._dynamic_labels(self.default, self.target_dir, self.num_files, self.settings)
             return
         self.num_files = self._count_files(self.target_dir)
@@ -131,7 +146,12 @@ class Gui:
         default_btn.place(x=20, y=95)
         all_btn = Radiobutton(win, text=f"All - {all_info}", var=self.settings_radio_btn, value=5, command=self._update_settings)
         all_btn.place(x=20, y=115)
-        
+        if self.options_radio_btn.get() == 1:
+            self.settings['Hashing'] = False
+            hash_btn.deselect()
+            hash_btn['state'] = DISABLED
+            self._dynamic_labels(self.default, self.target_dir, self.num_files, self.settings)
+            self._apply_settings()
         if self.settings['Files'] == 'Default':
             default_btn.select()
         elif self.settings['Files'] == 'All':
