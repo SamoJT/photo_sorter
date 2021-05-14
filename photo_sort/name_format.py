@@ -22,11 +22,11 @@ def get_taken(file_path):
     if len(m) != 2:
         m = '0' + m
     y = y[2:4]
-    return(f'{d}-{m}-{y}_')
+    return(f'{d}-{m}-{y}')
 
 def rename(d, old, new, ext, c):
     try:
-        new = f'{d}\\{new}{str(f"{c:003d}")}{ext}'
+        new = f'{d}\\{new}_{str(f"{c:003d}")}{ext}'
         os.rename(old, new)
         return True
     except:
@@ -34,10 +34,10 @@ def rename(d, old, new, ext, c):
     
 def main(d, allowed_ft):
     tot = 0
-    for root, dirs, file in os.walk(d):
+    for root, dirs, files in os.walk(d):
         if tot == 0:
             yield f'{len(dirs)} subdirectories'
-        for name in file:
+        for name in files:
             full_path = os.path.join(root, name)
             fn, ext = os.path.splitext(full_path)
             if type(allowed_ft) == list:

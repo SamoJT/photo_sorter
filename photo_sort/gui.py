@@ -1,5 +1,6 @@
 import os
 import name_format
+import date_move
 from tkinter import *
 from tkinter.filedialog import askdirectory
 from tkinter.ttk import Progressbar
@@ -30,45 +31,61 @@ class Gui:
     def main_loop(self):
         mainloop()
     
-           
-    def _rename_1(self):
-        if self.settings['Files'] == 'Default':
-            allowed_files = self.default_files
-        else:
-            allowed_files = 'All'
-
-        n_f = name_format.main(self.target_dir, allowed_files)
+    def _run_logic(self, run):
+        self.output_lb['state'] = NORMAL
+        self.output_lb.insert(END, '*'*20)
         while True:
             try:
                 self.output_lb['state'] = NORMAL
-                out = next(n_f)
+                out = next(run)
                 self.output_lb.insert(END, out)
                 self.out_list.append(out)
                 self.output_lb.see(END)
                 self.output_lb['state'] = DISABLED
                 self.progress_bar['value'] += 10
             except:
-                self.output_lb.insert(END, 'Done!')
-                self.output_lb.see(END)
-                self.output_lb['state'] = DISABLED
-                self.progress_bar['value'] = 100
                 break
 
         if self.settings['Output']:
             self._output(self.out_list)
-                    
-    def _move_2(self):
-        pass
-    
-    def _both_3(self):
-        pass
         
-    def run_logic(self):
+        self.progress_bar['value'] = 100
+        self.output_lb['state'] = NORMAL
+        self.output_lb.insert(END, '-- Done --')
+        self.out_list.append('-- Done --')
+        self.output_lb.see(END)
+        self.output_lb['state'] = DISABLED
+
+           
+    def _rename_1(self, allowed_files):
+        self.output_lb['state'] = NORMAL
+        self.output_lb.insert(END, '-- Renaming --')
+        self.out_list.append('-- Renaming --')
+        n_f = name_format.main(self.target_dir, allowed_files)
+        self._run_logic(n_f)
+                    
+    def _move_2(self, allowed_files):
+        self.output_lb['state'] = NORMAL
+        self.output_lb.insert(END, '-- Moving --')
+        self.out_list.append('-- Moving --')
+        d_m = date_move.main(self.target_dir, allowed_files, self.settings['Hashing'])
+        self._run_logic(d_m)
+
+    def _both_3(self, allowed_files):
+        self._rename_1(allowed_files)
+        self._move_2(allowed_files)
+        
+    def _call_run(self):
         options = {1: self._rename_1, 
                    2: self._move_2, 
                    3: self._both_3}
         
-        options[self.options_radio_btn.get()]()
+        if self.settings['Files'] == 'Default':
+            allowed_files = self.default_files
+        else:
+            allowed_files = 'All'
+            
+        options[self.options_radio_btn.get()](allowed_files)
 
     def _output(self, out_list):
         with open('output.txt', 'w') as f:
@@ -217,7 +234,7 @@ class Gui:
         
     def _push_buttons(self):
         Button(self.master, text="Settings", command=self._settings_window, width=11).place(x=15, y=105)
-        Button(self.master, text="Go!", command=lambda:self.run_logic(), width=11).place(x=15, y=135)
+        Button(self.master, text="Go!", command=lambda:self._call_run(), width=11).place(x=15, y=135)
         Button(self.master, text="Select dir", command=self._get_dir, width=7).place(x=455, y=17)
         
     def _progress_bar(self):
