@@ -148,7 +148,7 @@ class Gui:
         h_info = "Enables file hashing to check for duplicates. Enabling will increase run-time."
         o_info = "Outputs log info into a text file in current directory."
         default_info = f"{self.default_files}"
-        all_info = "All file types. Caution: ALL files will be renamed based on date created."
+        all_info = "All file types. (Caution: ALL files will be renamed based on modified date)"
         custom_info = "Enter file types seperated by commas."
         self.h_var, self.o_var = BooleanVar(), BooleanVar()
         
@@ -255,7 +255,7 @@ class Gui:
         self._push_buttons()
         self._progress_bar()
         
-        self.test_btn()
+        # self.test_btn()
 
     def test_btn(self):
         Button(self.master, text="DEBUG", command=lambda:self.test()).place(x=470, y=200)
