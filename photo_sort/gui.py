@@ -3,7 +3,7 @@ import name_format
 import date_move
 from tkinter import *
 from tkinter.filedialog import askdirectory
-from tkinter.ttk import Progressbar
+from tkinter.ttk import Labelframe, Progressbar
 
 class Gui:
 
@@ -81,6 +81,17 @@ class Gui:
         self._move_2(allowed_files)
         
     def _call_run(self):
+        if self.target_dir == "":
+            self.output_lb['state'] = NORMAL
+            self.output_lb.insert(END, '!! No directory selected !!')
+            self.output_lb['state'] = DISABLED
+            return
+        if self.num_files == 0:
+            self.output_lb['state'] = NORMAL
+            self.output_lb.insert(END, '!! No Files in directory !!')
+            self.output_lb['state'] = DISABLED
+            return
+        
         options = {1: self._rename_1, 
                    2: self._move_2, 
                    3: self._both_3}
@@ -141,14 +152,19 @@ class Gui:
             self.settings[k] = i
             c += 1
 
-    def _apply_settings(self):
+    def _apply_settings(self, win):
         self._clear_frames(self.settings_frame)
         self._dynamic_labels(self.default, self.target_dir, self.num_files, self.settings)
-
-    def _settings_window(self):
+        applied = Label(win, text="Applied!", fg="Red")
+        applied.place(x=70, y=153)
+        applied.after(2500, lambda: applied.destroy())
+        
+    def _settings_window(self, applied):
         win = Toplevel(self.master)
         win.title("Settings")
         win.geometry(f'{self.CANVAS_WIDTH-20}x{self.CANVAS_HEIGHT-60}+{self.POS_X}+{self.POS_Y}')
+        if applied:
+            Label(win, text="Applied!", fg="Red").place(x=85, y=150)
         
         h_info = "Enables file hashing to check for duplicates. Enabling will increase run-time."
         o_info = "Outputs log info into a text file in current directory."
@@ -183,7 +199,7 @@ class Gui:
         if self.settings['Output']:
             out_btn.select()
             
-        Button(win, text="Apply", command=lambda:self._apply_settings()).place(x=15, y=150)
+        Button(win, text="Apply", command=lambda:self._apply_settings(win)).place(x=15, y=150)
         # Potential future feature
         # Radiobutton(win, text=f"Custom - {custom_info}", var=self.radio_btn, value=3).place(x=20, y=105)
 
@@ -239,7 +255,7 @@ class Gui:
         bth.select()
         
     def _push_buttons(self):
-        Button(self.master, text="Settings", command=self._settings_window, width=11).place(x=15, y=105)
+        Button(self.master, text="Settings", command=lambda:self._settings_window(False), width=11).place(x=15, y=105)
         Button(self.master, text="Go!", command=lambda:self._call_run(), width=11).place(x=15, y=135)
         Button(self.master, text="Select dir", command=self._get_dir, width=7).place(x=455, y=17)
         
