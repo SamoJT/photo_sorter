@@ -8,9 +8,14 @@ from tkinter.ttk import Progressbar
 class Gui:
 
     def __init__(self):
+        self.master = Tk()
+        
         self.CANVAS_WIDTH = 550
         self.CANVAS_HEIGHT = 250
-        self.master = Tk()
+        self.SCREEN_WIDTH = self.master.winfo_screenwidth()
+        self.SCREEN_HEIGHT = self.master.winfo_screenheight()
+        self.POS_X = int((self.SCREEN_WIDTH / 2) - (self.CANVAS_WIDTH / 2))
+        self.POS_Y = int((self.SCREEN_HEIGHT / 2) - (self.CANVAS_HEIGHT / 2))
         
         self.options_radio_btn = IntVar()
         self.settings_radio_btn = IntVar()
@@ -56,7 +61,7 @@ class Gui:
         self.output_lb.see(END)
         self.output_lb['state'] = DISABLED
 
-           
+# Main execution logic           
     def _rename_1(self, allowed_files):
         self.output_lb['state'] = NORMAL
         self.output_lb.insert(END, '-- Renaming --')
@@ -123,7 +128,7 @@ class Gui:
         self.progress_bar['value'] = 0
         self._dynamic_labels(self.default, self.target_dir, self.num_files, self.settings)
        
-
+# Settings window logic and Init
     def _update_settings(self):
         if self.settings_radio_btn.get() == 4:
             f = 'Default'
@@ -143,7 +148,7 @@ class Gui:
     def _settings_window(self):
         win = Toplevel(self.master)
         win.title("Settings")
-        win.geometry(f'{self.CANVAS_WIDTH-20}x{self.CANVAS_HEIGHT-60}')
+        win.geometry(f'{self.CANVAS_WIDTH-20}x{self.CANVAS_HEIGHT-60}+{self.POS_X}+{self.POS_Y}')
         
         h_info = "Enables file hashing to check for duplicates. Enabling will increase run-time."
         o_info = "Outputs log info into a text file in current directory."
@@ -183,6 +188,7 @@ class Gui:
         # Radiobutton(win, text=f"Custom - {custom_info}", var=self.radio_btn, value=3).place(x=20, y=105)
 
 
+# Main window objects and Init
     def _frames(self):
         LabelFrame(self.master, text="Options").place(x=15, y=5, height=85, width=90)
         LabelFrame(self.master).place(x=15, y=65, height=35, width=90)  # Both divider
@@ -245,7 +251,9 @@ class Gui:
         self.master.resizable(width=False, height=False)
         self.master.title("Photo Sorter")
         # self.master.iconbitmap('../imgs/icon.ico')  # Throws not defined error.
-        self.master.geometry(f'{self.CANVAS_WIDTH}x{self.CANVAS_HEIGHT}')
+        
+        self.master.geometry(f'{self.CANVAS_WIDTH}x{self.CANVAS_HEIGHT}+{self.POS_X}+{self.POS_Y}')
+        
         
         self._frames()
         self._dynamic_labels(self.default, None, None, self.settings)

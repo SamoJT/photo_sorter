@@ -1,16 +1,16 @@
 import os
 import pathlib
 import datetime
-import sys
 import hashlib
-from random import choice
 from name_format import rename as suffix_increment
 
-# Move photos to dir based on YYYY/MM taken.
-# Automatically create dir if doesn't exist.
-# Hashes files with duplicate file name to 
-# determine if contents is same - if not rename
-# with prefix and move to correct dir.
+'''
+Move photos to dir based on YYYY/MM taken.
+Automatically create dir if doesn't exist.
+Hashes files with duplicate file name to 
+determine if contents is same - if not rename
+with prefix and move to correct dir.
+'''
 
 def check_dir(root, y, m):
     # Check if dir exists, create if not.
